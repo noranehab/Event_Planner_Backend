@@ -1,4 +1,4 @@
-project structure 
+Backend structure
 ```
 Event_Planner_Project/
 │
