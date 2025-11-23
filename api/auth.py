@@ -41,7 +41,7 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     # ✅ Add expiration for the access token
     access_token_expires = timedelta(minutes=30)
     token = utils.create_access_token(
-        data={"sub": db_user.email},
+        user_id=db_user.id,
         expires_delta=access_token_expires
     )
 
