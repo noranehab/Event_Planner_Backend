@@ -9,9 +9,17 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     # Relationships
-    organized_events = relationship("Event", back_populates="organizer")
-    event_participation = relationship("EventAttendee", back_populates="user")
+    organized_events = relationship(
+        "Event",
+        back_populates="organizer",
+        cascade="all, delete-orphan"
+    )
 
+    event_participation = relationship(
+        "EventAttendee",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
 
 class Event(Base):
     __tablename__ = "events"
@@ -24,9 +32,16 @@ class Event(Base):
     description = Column(String, nullable=False)
     organizer_id = Column(Integer, ForeignKey("users.id"))
 
-    organizer = relationship("User", back_populates="organized_events")
-    attendees = relationship("EventAttendee", back_populates="event")
+    organizer = relationship(
+        "User",
+        back_populates="organized_events"
+    )
 
+    attendees = relationship(
+        "EventAttendee",
+        back_populates="event",
+        cascade="all, delete-orphan"
+    )
 
 class EventAttendee(Base):
     __tablename__ = "event_attendees"
@@ -35,6 +50,14 @@ class EventAttendee(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     event_id = Column(Integer, ForeignKey("events.id"))
     role = Column(String, default="attendee")  # "organizer" or "attendee"
+    status = Column(String, default="Maybe") # Going / Maybe / Not Going
 
-    event = relationship("Event", back_populates="attendees")
-    user = relationship("User", back_populates="event_participation")
+    event = relationship(
+        "Event",
+        back_populates="attendees"
+    )
+
+    user = relationship(
+        "User",
+        back_populates="event_participation"
+    )

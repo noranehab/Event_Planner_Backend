@@ -1,3 +1,24 @@
+#Search events
+GET http://127.0.0.1:8000/events/search?trole=organizer&start_date=2025-02-01
+Accept: application/json
+#Authorization: Bearer <token>
+###
+
+#Organizer views attendance
+GET http://127.0.0.1:8000/events/18/attendees
+Accept: application/json
+#Authorization: Bearer <token>
+###
+
+
+#Attendee updates their attendance
+POST http://127.0.0.1:8000/events/18/attendance
+Content-Type: application/json
+#Authorization: Bearer <token>
+
+{ "status": "Going" }
+
+###
 #Delete an Event
 DELETE http://127.0.0.1:8000/events/2
 Accept: application/json

@@ -33,3 +33,7 @@ class EventResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class AttendanceUpdate(BaseModel):
+    status: str  # Going, Maybe, Not Going
