@@ -34,7 +34,7 @@ def create_event(
         user_id=user.id,
         event_id=new_event.id,
         role="organizer",
-        status=None
+        status="None"
     )
     db.add(organizer_entry)
     db.commit()
@@ -129,7 +129,7 @@ def invite_user(
         user_id=user_to_invite.id,
         event_id=event_id,
         role="attendee",
-        status=None
+        status="None"
     )
 
     db.add(invitation)
