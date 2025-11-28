@@ -50,7 +50,7 @@ class EventAttendee(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     event_id = Column(Integer, ForeignKey("events.id"))
     role = Column(String, default="attendee")  # "organizer" or "attendee"
-    status = Column(String, default="Maybe") # Going / Maybe / Not Going
+    status = Column(String, default=None, nullable=True) # Going / Maybe / Not Going
 
     event = relationship(
         "Event",

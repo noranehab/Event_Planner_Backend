@@ -29,11 +29,12 @@ def create_event(
     db.commit()
     db.refresh(new_event)
 
-    # Mark creator as ORGANIZER
+    # Mark creator as organizer (no status for organizers)
     organizer_entry = models.EventAttendee(
         user_id=user.id,
         event_id=new_event.id,
-        role="organizer"
+        role="organizer",
+        status=None
     )
     db.add(organizer_entry)
     db.commit()
@@ -72,15 +73,22 @@ def get_invited_events(
 
 
 # -------------------------------------------------
-# INVITE USER TO EVENT
+# INVITE USER TO EVENT (by ID or Email)
 # -------------------------------------------------
-@router.post("/{event_id}/invite/{user_id}")
+@router.post("/{event_id}/invite")
 def invite_user(
     event_id: int,
-    user_id: int,
+    invite_data: schemas.UserInvite,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
+    # Validate input
+    if not invite_data.user_id and not invite_data.email:
+        raise HTTPException(status_code=400, detail="Either user_id or email must be provided")
+
+    if invite_data.user_id and invite_data.email:
+        raise HTTPException(status_code=400, detail="Provide either user_id or email, not both")
+
     event = db.query(models.Event).filter(
         models.Event.id == event_id
     ).first()
@@ -91,16 +99,43 @@ def invite_user(
     if event.organizer_id != current_user.id:
         raise HTTPException(status_code=403, detail="Only organizer can invite users")
 
+    # Find user by ID or email
+    if invite_data.user_id:
+        user_to_invite = db.query(models.User).filter(
+            models.User.id == invite_data.user_id
+        ).first()
+    else:
+        user_to_invite = db.query(models.User).filter(
+            models.User.email == invite_data.email
+        ).first()
+
+    if not user_to_invite:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Prevent organizer from inviting themselves
+    if user_to_invite.id == current_user.id:
+        raise HTTPException(status_code=400, detail="Organizer cannot invite themselves")
+
+    # Check if user is already invited
+    existing_invitation = db.query(models.EventAttendee).filter(
+        models.EventAttendee.event_id == event_id,
+        models.EventAttendee.user_id == user_to_invite.id
+    ).first()
+
+    if existing_invitation:
+        raise HTTPException(status_code=400, detail="User is already invited to this event")
+
     invitation = models.EventAttendee(
-        user_id=user_id,
+        user_id=user_to_invite.id,
         event_id=event_id,
-        role="attendee"
+        role="attendee",
+        status=None
     )
 
     db.add(invitation)
     db.commit()
 
-    return {"message": "User invited successfully"}
+    return {"message": "User invited successfully", "user_email": user_to_invite.email}
 
 
 # -------------------------------------------------

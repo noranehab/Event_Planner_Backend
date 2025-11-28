@@ -37,3 +37,8 @@ class EventResponse(BaseModel):
 
 class AttendanceUpdate(BaseModel):
     status: str  # Going, Maybe, Not Going
+
+
+class UserInvite(BaseModel):
+    user_id: int | None = None
+    email: str | None = None
